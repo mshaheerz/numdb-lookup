@@ -15,5 +15,5 @@ if __name__ == "__main__":
     parser.add_argument("--api_key", required=True, help="Truecaller API key")
     args = parser.parse_args()
 
-    phone_number = "+919746854699"  # Replace with the phone number you want to check
+    phone_number = "+919735854629"  # Replace with the phone number you want to check
     get_phone_number_details(args.api_key, phone_number)
