@@ -1,96 +1,112 @@
-# numdb-lookup
-Finding number details all possible ways
-# Phone Number Lookup Script
+# NumDB-Lookup
 
-This script allows you to perform phone number lookups using different services such as normal lookup, Truecaller, and Numverify.
+Phone Number Intelligence Tool - Look up phone number details using 6 different methods from a single colorful interactive terminal menu.
+
+## Features
+
+- **Interactive colorful menu** with ASCII banner and color-coded output
+- **6 lookup methods** (1 offline + 5 API-based)
+- **Config file** for saving API keys - set once, use forever
+- **Settings portal** to manage API keys from the menu
+- **Production-ready** folder structure with base class pattern
+
+## Lookup Methods
+
+| # | Method | API Key Required | What It Provides |
+|---|--------|-----------------|------------------|
+| 1 | **Normal Lookup** | No (offline) | Timezone, location, carrier, number type |
+| 2 | **Truecaller API** | Yes | Caller identification and details |
+| 3 | **Numverify API** | Yes | Validation, formatting, carrier, line type |
+| 4 | **Abstract API** | Yes | Validation, formatting, country, carrier |
+| 5 | **Veriphone API** | Yes | Verification, type, carrier, region |
+| 6 | **IPQualityScore API** | Yes | Fraud scoring, carrier, abuse detection |
 
 ## Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/phone_lookup.git
-   cd phone_lookup
-Make the installation script executable:
-bash
-Copy
-chmod +x install_requirements.sh
-Run the installation script:
-bash
-Copy
-./install_requirements.sh all
-Install all dependencies: ./install_requirements.sh all
-Install only Python dependencies: ./install_requirements.sh python
-Make the Bash script executable: ./install_requirements.sh bash
-Display help message: ./install_requirements.sh help
-Usage
-Normal Lookup
-bash
-Copy
-./phone_lookup.sh normal
-Truecaller Lookup
-bash
-Copy
-./phone_lookup.sh truecaller
-You will be prompted to enter your Truecaller API key.
-Numverify Lookup
-bash
-Copy
-./phone_lookup.sh numverify
-You will be prompted to enter your Numverify API key.
-Help
-bash
-Copy
-./phone_lookup.sh help
-Dependencies
-Python 3
-phonenumbers library for normal lookup
-requests library for API calls
-Contributing
-Feel free to contribute to this project by submitting pull requests or opening issues.
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
-Copy
+```bash
+git clone https://github.com/mshaheerz/numdb-lookup.git
+cd numdb-lookup
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-### Downloadable `README.md`
+## How to Run
 
-To make the `README.md` file downloadable, you can simply create a GitHub repository and push your project files, including the `README.md`, to the repository. Users can then clone the repository or download the files directly from GitHub.
+```bash
+python3 main.py
+```
 
-Here are the steps to create a GitHub repository and push your project:
+That's it! The interactive menu handles everything:
 
-1. **Create a GitHub Repository:**
-   - Go to [GitHub](https://github.com/) and sign in to your account.
-   - Click on the "+" icon in the upper right corner and select "New repository."
-   - Fill in the repository name (e.g., `phone_lookup`), description, and choose whether it should be public or private.
-   - Click "Create repository."
+```
+  ╔══════════════════════════════════════════════════╗
+  |                   MAIN MENU                      |
+  ╚══════════════════════════════════════════════════╝
 
-2. **Push Your Project to GitHub:**
-   - Open a terminal and navigate to your project directory.
-   - Initialize a new Git repository (if not already done):
-     ```bash
-     git init
-     ```
-   - Add your files to the repository:
-     ```bash
-     git add .
-     ```
-   - Commit your changes:
-     ```bash
-     git commit -m "Initial commit"
-     ```
-   - Link your local repository to the remote GitHub repository:
-     ```bash
-     git remote add origin https://github.com/yourusername/phone_lookup.git
-     ```
-   - Push your changes to GitHub:
-     ```bash
-     git push -u origin main
-     ```
+    [1] Normal Lookup       (no API key needed)
+    [2] Truecaller API      (API key: configured)
+    [3] Numverify API       (API key: missing)
+    [4] Abstract API        (API key: missing)
+    [5] Veriphone API       (API key: missing)
+    [6] IPQualityScore API  (API key: missing)
+    ──────────────────────────────────────
+    [7] Settings
+    [8] Exit
 
-3. **Download the Project:**
-   - Users can clone the repository using:
-     ```bash
-     git clone https://github.com/yourusername/phone_lookup.git
-     ```
-   - Alternatively, they can download the repository as a ZIP file by clicking on the "Code" button on the repository page and selecting "Download ZIP."
+  Enter your choice:
+```
 
-By following these steps, you will have a downloadable `README.md` file as part of your project on GitHub.
+### Setting Up API Keys
+
+1. Launch the tool: `python3 main.py`
+2. Select **Settings** from the menu
+3. Choose **Add / Edit API Key**
+4. Select the service and paste your key
+5. Keys are saved to `config.json` - you only need to do this once
+
+### Getting API Keys
+
+| Service | Sign Up |
+|---------|---------|
+| Truecaller | [developer.truecaller.com](https://developer.truecaller.com) |
+| Numverify | [numverify.com](https://numverify.com) |
+| Abstract API | [abstractapi.com](https://www.abstractapi.com/api/phone-validation-api) |
+| Veriphone | [veriphone.io](https://veriphone.io) |
+| IPQualityScore | [ipqualityscore.com](https://www.ipqualityscore.com) |
+
+## Project Structure
+
+```
+numdb-lookup/
+├── main.py                    # Entry point
+├── requirements.txt           # Dependencies
+├── config.json                # API keys (auto-created, gitignored)
+├── core/
+│   ├── config.py              # Config manager
+│   ├── menu.py                # Interactive menu system
+│   ├── display.py             # Colors, banner, formatting
+│   ├── validator.py           # Phone number validation
+│   └── lookups/
+│       ├── base.py            # BaseLookup abstract class
+│       ├── normal.py          # Offline phonenumbers lookup
+│       ├── truecaller.py      # Truecaller API
+│       ├── numverify.py       # Numverify API
+│       ├── abstract_api.py    # Abstract API
+│       ├── veriphone.py       # Veriphone API
+│       └── ipqualityscore.py  # IPQualityScore API
+```
+
+## Dependencies
+
+- `phonenumbers` - Offline phone number parsing and validation
+- `requests` - HTTP client for API calls
+- `colorama` - Cross-platform terminal color support
+
+## Contributing
+
+Feel free to contribute by submitting pull requests or opening issues.
+
+## License
+
+This project is licensed under the MIT License.
