@@ -1,10 +1,11 @@
 from core.lookups import get_all_lookups
 from core.validator import validate_phone_number
 from core.display import (
-    GREEN, RED, DIM, RESET, BOLD, WHITE,
+    GREEN, RED, DIM, RESET, BOLD, WHITE, YELLOW,
     clear_screen, print_banner, print_menu_header, print_menu_option,
     print_separator, print_result_table, print_success, print_error,
-    print_info, print_warning, input_styled,
+    print_info, print_warning, input_styled, print_summary_table,
+    print_section_divider,
 )
 
 
@@ -19,10 +20,13 @@ class MenuSystem:
             self._show_main_menu()
             choice = input_styled("Enter your choice: ").strip()
 
-            settings_num = str(len(self.lookups) + 1)
-            exit_num = str(len(self.lookups) + 2)
+            run_all_num = str(len(self.lookups) + 1)
+            settings_num = str(len(self.lookups) + 2)
+            exit_num = str(len(self.lookups) + 3)
 
-            if choice == settings_num:
+            if choice == run_all_num:
+                self._run_all_lookups()
+            elif choice == settings_num:
                 self._settings_menu()
             elif choice == exit_num:
                 print()
@@ -54,8 +58,9 @@ class MenuSystem:
         print()
         print_separator()
         print()
-        print_menu_option(len(self.lookups) + 1, "Settings", "")
-        print_menu_option(len(self.lookups) + 2, "Exit", "")
+        print_menu_option(len(self.lookups) + 1, "Run All Lookups", f"({GREEN}comprehensive scan{RESET})")
+        print_menu_option(len(self.lookups) + 2, "Settings", "")
+        print_menu_option(len(self.lookups) + 3, "Exit", "")
         print()
 
     def _run_lookup(self, lookup):
@@ -102,6 +107,82 @@ class MenuSystem:
         else:
             print()
             print_error(f"Lookup failed: {result['error']}")
+
+        print()
+        input_styled("Press Enter to return to menu...")
+
+    def _run_all_lookups(self):
+        clear_screen()
+        print_banner()
+        print_menu_header("RUN ALL LOOKUPS")
+        print_info("Runs all available lookups for comprehensive results.")
+        print()
+
+        # Get phone number
+        phone_number = input_styled("Enter phone number (e.g., +14155552671): ").strip()
+        if not phone_number:
+            print_error("Phone number cannot be empty.")
+            input_styled("Press Enter to continue...")
+            return
+
+        # Validate
+        is_valid, msg, _ = validate_phone_number(phone_number)
+        if not is_valid:
+            print_warning(f"Validation: {msg}")
+            proceed = input_styled("Continue anyway? (y/n): ").strip().lower()
+            if proceed != "y":
+                return
+
+        print()
+        print_info(f"Running all lookups for {phone_number}...")
+        print()
+
+        summary = []
+        results = []
+
+        for lookup in self.lookups:
+            # Check API key
+            api_key = None
+            if lookup.requires_api_key:
+                api_key = self.config.get_api_key(lookup.api_key_name)
+                if not api_key:
+                    summary.append({
+                        "name": lookup.name,
+                        "status": "skipped",
+                        "message": "no API key",
+                    })
+                    continue
+
+            print_info(f"Running {lookup.name}...")
+            result = lookup.lookup(phone_number, api_key=api_key)
+
+            if result["success"]:
+                summary.append({
+                    "name": lookup.name,
+                    "status": "success",
+                    "message": "",
+                })
+                results.append((lookup.name, result["data"]))
+            else:
+                summary.append({
+                    "name": lookup.name,
+                    "status": "failed",
+                    "message": result["error"][:40] if result["error"] else "",
+                })
+
+        # Display summary
+        print()
+        print_summary_table("All Lookups Summary", summary)
+
+        # Display individual results
+        for name, data in results:
+            print_result_table(f"{name} Result", data)
+
+        # Stats
+        success_count = sum(1 for s in summary if s["status"] == "success")
+        failed_count = sum(1 for s in summary if s["status"] == "failed")
+        skipped_count = sum(1 for s in summary if s["status"] == "skipped")
+        print_info(f"Done: {success_count} succeeded, {failed_count} failed, {skipped_count} skipped")
 
         print()
         input_styled("Press Enter to return to menu...")
@@ -173,6 +254,12 @@ class MenuSystem:
         if choice.isdigit() and 1 <= int(choice) <= len(services):
             service = services[int(choice) - 1]
             display_name = service.replace("_", " ").title()
+
+            # Show format hint for neutrino
+            if service == "neutrino":
+                print()
+                print_info("Neutrino requires format: userid|apikey")
+
             print()
             new_key = input_styled(f"Enter API key for {display_name}: ").strip()
             if new_key:

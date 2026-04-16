@@ -20,7 +20,7 @@ BANNER = f"""{CYAN}{BOLD}
  | |\\  | |_| | | | | | | |_| | |_) |_____| |__| (_) | (_) |   <| |_| | |_) |
  |_| \\_|\\__,_|_| |_| |_|____/|____/      |_____\\___/ \\___/|_|\\_\\\\__,_| .__/
                                                                        |_|
-{RESET}{DIM}  Phone Number Intelligence Tool v2.0{RESET}
+{RESET}{DIM}  Phone Number Intelligence Tool v3.0{RESET}
 """
 
 
@@ -93,6 +93,52 @@ def print_result_table(title, data):
         print(f"  {CYAN}│{RESET} {key_str}{' ' * padding} : {val_str}")
     print(f"  {CYAN}└{'─' * (box_width + 1)}┘{RESET}")
     print()
+
+
+def print_summary_table(title, results):
+    """Print a summary table for Run All Lookups.
+    results: list of dicts with keys 'name', 'status' ('success'/'failed'/'skipped'), 'message'
+    """
+    if not results:
+        return
+
+    max_name = max(len(r["name"]) for r in results)
+    max_msg = max(len(r.get("message", "")) for r in results)
+    box_width = max(max_name + max_msg + 12, len(title) + 8)
+
+    print()
+    print(f"  {MAGENTA}┌─── {BOLD}{title}{RESET}{MAGENTA} {'─' * (box_width - len(title) - 5)}┐{RESET}")
+    for r in results:
+        name = r["name"]
+        status = r["status"]
+        msg = r.get("message", "")
+
+        if status == "success":
+            icon = f"{GREEN}✓{RESET}"
+            status_text = f"{GREEN}Success{RESET}"
+        elif status == "failed":
+            icon = f"{RED}✗{RESET}"
+            status_text = f"{RED}Failed{RESET}"
+        else:
+            icon = f"{YELLOW}⊘{RESET}"
+            status_text = f"{YELLOW}Skipped{RESET}"
+
+        name_padded = f"{WHITE}{BOLD}{name}{RESET}"
+        padding = max_name - len(name)
+
+        if msg:
+            print(f"  {MAGENTA}│{RESET} {icon} {name_padded}{' ' * padding} : {status_text} ({DIM}{msg}{RESET})")
+        else:
+            print(f"  {MAGENTA}│{RESET} {icon} {name_padded}{' ' * padding} : {status_text}")
+    print(f"  {MAGENTA}└{'─' * (box_width + 1)}┘{RESET}")
+    print()
+
+
+def print_section_divider(text):
+    width = 50
+    padding = (width - len(text) - 2) // 2
+    extra = (width - len(text) - 2) % 2
+    print(f"  {DIM}{'─' * padding} {text} {'─' * (padding + extra)}{RESET}")
 
 
 def input_styled(prompt):

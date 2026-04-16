@@ -23,6 +23,11 @@ class ConfigManager:
                 "abstract_api": "",
                 "veriphone": "",
                 "ipqualityscore": "",
+                "numlookupapi": "",
+                "telnyx": "",
+                "neutrino": "",
+                "leakcheck": "",
+                "opencnam": "",
             }
         }
 
@@ -32,6 +37,10 @@ class ConfigManager:
                 self.data = json.load(f)
             if "api_keys" not in self.data:
                 self.data["api_keys"] = self._default_config()["api_keys"]
+            # Merge any new default keys into existing config
+            default_keys = self._default_config()["api_keys"]
+            for key in default_keys:
+                self.data["api_keys"].setdefault(key, default_keys[key])
         except (json.JSONDecodeError, IOError):
             print_warning("Config file corrupted. Resetting to defaults.")
             self.data = self._default_config()
